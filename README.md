@@ -1,2 +1,6 @@
 # TRAIL
-trail token
+
+PolkaTrail token
+
+
+### License MIT
