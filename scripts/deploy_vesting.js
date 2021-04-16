@@ -15,7 +15,7 @@ async function main() {
 	await hre.run("compile")
 
 	// We get the contract to deploy
-	const Trail = await hre.ethers.getContractFactory("Trail")
+	const Vesting = await hre.ethers.getContractFactory("Vesting")
 	console.log("Deploying Contract...")
 
 	let network = process.env.NETWORK ? process.env.NETWORK : "rinkeby"
@@ -33,11 +33,29 @@ async function main() {
 		"ETH"
 	)
 
-	const deployed = await Trail.deploy()
+	const baseTokenAddress = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8"
+	const vestingAddress1 = "0x1111117Fe854f5CC8BE01Ff0F74605f4F3860cbD"
+	const vestingAddress2 = "0x11111190553D6177CA22c53fCA807871FAE687Cf"
 
+	const vestingTime = Math.round(new Date().getTime() / 1000) + 60 //now + 60 seconds
+	const deployed = await Vesting.deploy(baseTokenAddress, vestingAddress1, vestingTime)
 	let dep = await deployed.deployed()
+	console.log("Vesting Contract deployed to:", dep.address)
 
-	console.log("Contract deployed to:", dep.address)
+	//transfer funds to vesting
+	var contract = new ethers.Contract(baseTokenAddress, abi, wallet)
+
+	var numberOfTokens = ethers.utils.parseUnits("10.0", numberOfDecimals)
+	var options = { gasLimit: 1500000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
+
+	contract.transferFrom(fromAddress, targetAddress, numberOfTokens, options).then(function (tx) {
+		console.log(tx)
+	})
+
+
+	deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime + 60)
+	dep = await deployed.deployed()
+	console.log("Vesting deployed to:", dep.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
