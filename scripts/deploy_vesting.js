@@ -6,6 +6,8 @@
 const hre = require("hardhat")
 require("@nomiclabs/hardhat-web3")
 
+const erc20abi = require("../utils/erc20_abi.js")
+
 async function main() {
 	// Hardhat always runs the compile task when running scripts with its command
 	// line interface.
@@ -33,29 +35,25 @@ async function main() {
 		"ETH"
 	)
 
-	const baseTokenAddress = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8"
-	const vestingAddress1 = "0x1111117Fe854f5CC8BE01Ff0F74605f4F3860cbD"
-	const vestingAddress2 = "0x11111190553D6177CA22c53fCA807871FAE687Cf"
+	const baseTokenAddress = "0x0A5cC7153991166B88B9CCE672aB8b8a211aE6d6"
+	const vestingAddress1 = "0x8C99B5A504DDd9EA33842a6e062f0Fc283199cf2"
+	const vestingAddress2 = "0x76451a0e22539FF373920cd356791f0CDA2c017c"
 
 	const vestingTime = Math.round(new Date().getTime() / 1000) + 60 //now + 60 seconds
-	const deployed = await Vesting.deploy(baseTokenAddress, vestingAddress1, vestingTime)
+	let deployed = await Vesting.deploy(baseTokenAddress, vestingAddress1, vestingTime)
 	let dep = await deployed.deployed()
 	console.log("Vesting Contract deployed to:", dep.address)
 
 	//transfer funds to vesting
-	var contract = new ethers.Contract(baseTokenAddress, abi, wallet)
+	let erc20contract = new ethers.Contract(baseTokenAddress, erc20abi, deployer)
+	let numberOfTokens = ethers.utils.parseUnits("1234.0", 18)
+	let options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
+	let tx = await erc20contract.transfer(dep.address, numberOfTokens, options)
+	console.log("Tokens deployed ok @ ", tx.hash)
 
-	var numberOfTokens = ethers.utils.parseUnits("10.0", numberOfDecimals)
-	var options = { gasLimit: 1500000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
-
-	contract.transferFrom(fromAddress, targetAddress, numberOfTokens, options).then(function (tx) {
-		console.log(tx)
-	})
-
-
-	deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime + 60)
-	dep = await deployed.deployed()
-	console.log("Vesting deployed to:", dep.address)
+	// deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime + 60)
+	// dep = await deployed.deployed()
+	// console.log("Vesting deployed to:", dep.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

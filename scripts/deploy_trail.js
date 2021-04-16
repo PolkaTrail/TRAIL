@@ -15,7 +15,7 @@ async function main() {
 	await hre.run("compile")
 
 	// We get the contract to deploy
-	const Trail = await hre.ethers.getContractFactory("Vesting")
+	const Trail = await hre.ethers.getContractFactory("Trail")
 	console.log("Deploying Contract...")
 
 	let network = process.env.NETWORK ? process.env.NETWORK : "rinkeby"
