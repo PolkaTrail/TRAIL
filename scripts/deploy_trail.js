@@ -6,6 +6,12 @@
 const hre = require("hardhat")
 require("@nomiclabs/hardhat-web3")
 
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms)
+	})
+}
+
 async function main() {
 	// Hardhat always runs the compile task when running scripts with its command
 	// line interface.
@@ -34,10 +40,17 @@ async function main() {
 	)
 
 	const deployed = await Trail.deploy()
-
 	let dep = await deployed.deployed()
 
 	console.log("Contract deployed to:", dep.address)
+
+	if (network === "rinkeby" || network === "mainnet") {
+		await sleep(20000) // 20 seconds sleep
+		await hre.run("verify:verify", {
+			address: dep.address,
+			constructorArguments: [],
+		})
+	}
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -8,6 +8,12 @@ require("@nomiclabs/hardhat-web3")
 
 const erc20abi = require("../utils/erc20_abi.js")
 
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms)
+	})
+}
+
 async function main() {
 	// Hardhat always runs the compile task when running scripts with its command
 	// line interface.
@@ -35,25 +41,53 @@ async function main() {
 		"ETH"
 	)
 
-	const baseTokenAddress = "0x0A5cC7153991166B88B9CCE672aB8b8a211aE6d6"
-	const vestingAddress1 = "0x8C99B5A504DDd9EA33842a6e062f0Fc283199cf2"
-	const vestingAddress2 = "0x76451a0e22539FF373920cd356791f0CDA2c017c"
+	const baseTokenAddress = "0x9Fe423993c8879B1B68E5236fa8893a94258F96F" // Trail Token
+	const vestingAddress1 = "0x1111117Fe854f5CC8BE01Ff0F74605f4F3860cbD" // team
+	const vestingAddress2 = "0x11111190553D6177CA22c53fCA807871FAE687Cf" // reserves
 
-	const vestingTime = Math.round(new Date().getTime() / 1000) + 60 //now + 60 seconds
+	//-------------- TEAM VESTING --------------
+	let vestingTime = Math.round(new Date().getTime() / 1000) + 600 //now + 10 minutes
+	console.log("vesting time set to", vestingTime)
 	let deployed = await Vesting.deploy(baseTokenAddress, vestingAddress1, vestingTime)
 	let dep = await deployed.deployed()
-	console.log("Vesting Contract deployed to:", dep.address)
+	console.log("Vesting Contract deployed at:", dep.address)
 
-	//transfer funds to vesting
+	if (network === "rinkeby" || network === "mainnet") {
+		await sleep(20000) // 20 seconds sleep
+		await hre.run("verify:verify", {
+			address: dep.address,
+			constructorArguments: [baseTokenAddress, vestingAddress1, vestingTime],
+		})
+	}
+
 	let erc20contract = new ethers.Contract(baseTokenAddress, erc20abi, deployer)
-	let numberOfTokens = ethers.utils.parseUnits("1234.0", 18)
+	let numberOfTokens = ethers.utils.parseUnits("130000.0", 18) //13%
 	let options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
 	let tx = await erc20contract.transfer(dep.address, numberOfTokens, options)
-	console.log("Tokens deployed ok @ ", tx.hash)
+	console.log("Vested Tokens trasfered.....", tx.hash)
+	//------------------------------------------
 
-	// deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime + 60)
-	// dep = await deployed.deployed()
-	// console.log("Vesting deployed to:", dep.address)
+	//-------------- RESERVES VESTING --------------
+	vestingTime = Math.round(new Date().getTime() / 1000) + 900 //now + 15 minutes
+	console.log("vesting time set to", vestingTime)
+	deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime)
+	dep = await deployed.deployed()
+	console.log("Vesting Contract deployed tx:", dep.address)
+
+	if (network === "rinkeby" || network === "mainnet") {
+		await sleep(20000) // 20 seconds sleep
+		await hre.run("verify:verify", {
+			address: dep.address,
+			constructorArguments: [baseTokenAddress, vestingAddress2, vestingTime],
+		})
+	}
+
+	erc20contract = new ethers.Contract(baseTokenAddress, erc20abi, deployer)
+	numberOfTokens = ethers.utils.parseUnits("130000.0", 18) //13%
+	options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
+	tx = await erc20contract.transfer(dep.address, numberOfTokens, options)
+	console.log("Vested tokens transfered......", tx.hash)
+	//------------------------------------------
 }
 
 // We recommend this pattern to be able to use async/await everywhere

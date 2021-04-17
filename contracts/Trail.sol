@@ -361,7 +361,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 	) internal virtual {
 		require(sender != address(0), "ERC20: transfer from the zero address");
 		require(recipient != address(0), "ERC20: transfer to the zero address");
-		require(recipient != address(this), "No tokens allowed to be sent here");
 
 		_beforeTokenTransfer(sender, recipient, amount);
 
@@ -834,18 +833,16 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, EIP712 {
 // Congratulations, you reached the last part of the contract
 contract Trail is ERC20Permit, ERC20Burnable, Ownable {
 	constructor() ERC20Permit("TRAIL") ERC20("TRAIL", "TRAIL") {
-		_mint(msg.sender, 100000000 * (10**uint256(18))); // 1 million, 18 decimals
+		_mint(msg.sender, 1000000 * (10**uint256(18))); // 1 million, 18 decimals
 	}
 
-	// withdraw currency accidentally sent to the smart contract
+	// Withdraw currency accidentally sent to the smart contract
 	function withdraw() public onlyOwner {
 		uint256 balance = address(this).balance;
 		payable(msg.sender).transfer(balance);
 	}
 
-	/**
-	 * @dev Owner claim any tokens that transfered to this contract address
-	 */
+	// Owner claim any tokens that transfered to this contract address
 	function reclaimToken(ERC20 token) public onlyOwner {
 		require(address(token) != address(0));
 		uint256 balance = token.balanceOf(address(this));

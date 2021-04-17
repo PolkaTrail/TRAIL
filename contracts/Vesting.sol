@@ -466,7 +466,7 @@ contract Vesting {
 		token().safeTransfer(beneficiary(), amount);
 	}
 
-	function getBlockTimestamp() internal view returns (uint256) {
+	function getBlockTimestamp() public view returns (uint256) {
 		// solium-disable-next-line security/no-block-members
 		return block.timestamp;
 	}
