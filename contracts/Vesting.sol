@@ -41,14 +41,14 @@ contract Vesting is Ownable {
 		uint16 _vestingDurationInDays,
 		uint16 _vestingCliffInDays
 	) external onlyOwner {
-		require(tokenGrants[_recipient].amount == 0, "grant already exists, must revoke first");
+		require(tokenGrants[_recipient].amount == 0, "grant already exists");
 		require(_vestingCliffInDays <= 365, "cliff greater than one year");
 		require(_vestingDurationInDays <= 5 * 365, "duration greater than 5 years");
 
 		uint256 amountVestedPerDay = _amount.div(_vestingDurationInDays);
 		require(amountVestedPerDay > 0, "amountVestedPerDay > 0");
 
-		// Transfer the grant tokens under the control of the vesting contract
+		// require allowance
 		require(token.transferFrom(owner(), address(this), _amount));
 
 		Grant memory grant =
