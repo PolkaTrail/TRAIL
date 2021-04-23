@@ -16,7 +16,6 @@ contract Trail is ERC20Permit, ERC20Burnable, Ownable {
 		payable(msg.sender).transfer(balance);
 	}
 
-	// Owner claim any tokens that transfered to this contract address
 	function reclaimToken(IERC20 token) public onlyOwner {
 		require(address(token) != address(0));
 		uint256 balance = token.balanceOf(address(this));
