@@ -1,5 +1,6 @@
 const { expect } = require("chai")
 const { ethers } = require("hardhat")
+const { time, balance } = require("@openzeppelin/test-helpers")
 
 let trail
 let owner, acc1, acc2
@@ -29,5 +30,21 @@ describe("Deploy Trail", function () {
 		// Transfer 50 tokens from addr1 to addr2
 		await trail.connect(acc1).transfer(acc2.address, 50)
 		expect(await trail.balanceOf(acc2.address)).to.equal(50)
+	})
+
+	it("Should transfer accidentally sent ERC20 tokens to this contract", async function () {
+		//deploy an erc20 token for
+		let ERC20MockContract = await ethers.getContractFactory("ERC20Mock")
+		erc20 = await ERC20MockContract.connect(acc1).deploy("ERCToken", "ERC", "10000")
+		await erc20.deployed()
+
+		// Transfer some tokens to this contract
+		await erc20.connect(acc1).transfer(trail.address, 100)
+		expect(await erc20.balanceOf(trail.address)).to.equal(100)
+		expect(await erc20.balanceOf(owner.address)).to.equal(0)
+
+		// get them
+		await trail.reclaimToken(erc20.address)
+		expect(await erc20.balanceOf(owner.address)).to.equal(100)
 	})
 })

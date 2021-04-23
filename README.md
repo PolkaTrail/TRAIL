@@ -1,6 +1,5 @@
 # TRAIL
 
-PolkaTrail token
-
+PolkaTrail token + the Vesting Vault
 
 ### License MIT

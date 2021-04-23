@@ -1,25 +1,18 @@
 {
-	"name": "trail",
+	"name": "trail-with-vesting",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
 		"compile": "npx hardhat clean; npx hardhat compile",
 		"accounts": "npx hardhat accounts",
-		"balance": "npx hardhat balance",
-		"generate": "npx hardhat generate",
-		"test": "REPORT_GAS=true npx hardhat test --network ganache",
+		"test": "npx hardhat test --network ganache",
+		"testGas": "REPORT_GAS=true npx hardhat test --network ganache",
 		"prettier": "prettier --write 'contracts/**/*.sol'",
-		"deploy_t:ganache": "NETWORK=ganache npx hardhat run --network ganache scripts/deploy_trail.js",
 		"deploy_t:rinkeby": "NETWORK=rinkeby npx hardhat run --network rinkeby scripts/deploy_trail.js",
 		"deploy_t:mainnet": "NETWORK=mainnet npx hardhat run --network rinkeby scripts/deploy_trail.js",
-		"verify_t:rinkeby": "npx hardhat verify --network rinkeby 0x8DFe0E3576a98bd8D29888CdEAC988f9B78d42de",
-		"verify_t:mainnet": "npx hardhat verify --network mainnet DEPLOYED_CONTRACT_ADDRESS",
-		"deploy_v:ganache": "NETWORK=ganache npx hardhat run --network ganache scripts/deploy_vesting.js",
 		"deploy_v:rinkeby": "NETWORK=rinkeby npx hardhat run --network rinkeby scripts/deploy_vesting.js",
-		"deploy_v:mainnet": "NETWORK=mainnet npx hardhat run --network rinkeby scripts/deploy_vesting.js",
-		"verify_v:rinkeby": "npx hardhat verify --network rinkeby 0x39ba2DF06426402807CB709373B658017fc30BF8",
-		"verify_v:mainnet": "npx hardhat verify --network mainnet DEPLOYED_CONTRACT_ADDRESS"
+		"deploy_v:mainnet": "NETWORK=mainnet npx hardhat run --network rinkeby scripts/deploy_vesting.js"
 	},
 	"author": "Andrei",
 	"license": "MIT",
@@ -42,7 +35,7 @@
 		"hardhat": "^2.1.2",
 		"hardhat-gas-reporter": "^1.0.4",
 		"prettier": "^2.2.1",
-		"prettier-plugin-solidity": "^1.0.0-beta.7",
+		"prettier-plugin-solidity": "^1.0.0-beta.9",
 		"web3": "^1.3.4"
 	}
 }

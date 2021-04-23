@@ -1,4 +1,4 @@
-const abi = [
+const ERC20_ABI = [
 	{
 		constant: true,
 		inputs: [],
@@ -221,4 +221,4 @@ const abi = [
 	},
 ]
 
-module.exports = abi
+module.exports = ERC20_ABI

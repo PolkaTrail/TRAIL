@@ -6,7 +6,10 @@
 const hre = require("hardhat")
 require("@nomiclabs/hardhat-web3")
 
-const erc20abi = require("../utils/erc20_abi.js")
+const ERC20_ABI = require("../utils/erc20_abi.js")
+const VESTING_ABI = require("../utils/vesting_abi.js")
+
+const GASPrice = "10" //!important
 
 function sleep(ms) {
 	return new Promise((resolve) => {
@@ -27,7 +30,6 @@ async function main() {
 	console.log("Deploying Contract...")
 
 	let network = process.env.NETWORK ? process.env.NETWORK : "rinkeby"
-
 	console.log(">-> Network is set to " + network)
 
 	// ethers is avaialble in the global scope
@@ -41,52 +43,45 @@ async function main() {
 		"ETH"
 	)
 
-	const baseTokenAddress = "0x9Fe423993c8879B1B68E5236fa8893a94258F96F" // Trail Token
-	const vestingAddress1 = "0x1111117Fe854f5CC8BE01Ff0F74605f4F3860cbD" // team
-	const vestingAddress2 = "0x11111190553D6177CA22c53fCA807871FAE687Cf" // reserves
-
-	//-------------- TEAM VESTING --------------
-	let vestingTime = Math.round(new Date().getTime() / 1000) + 600 //now + 10 minutes
-	console.log("vesting time set to", vestingTime)
-	let deployed = await Vesting.deploy(baseTokenAddress, vestingAddress1, vestingTime)
+	const trailTokenAddress = "0x9Fe423993c8879B1B68E5236fa8893a94258F96F"
+	let deployed = await Vesting.deploy(trailTokenAddress)
 	let dep = await deployed.deployed()
-	console.log("Vesting Contract deployed at:", dep.address)
 
 	if (network === "rinkeby" || network === "mainnet") {
 		await sleep(20000) // 20 seconds sleep
 		await hre.run("verify:verify", {
 			address: dep.address,
-			constructorArguments: [baseTokenAddress, vestingAddress1, vestingTime],
+			constructorArguments: [baseTokenAddress],
 		})
 	}
 
-	let erc20contract = new ethers.Contract(baseTokenAddress, erc20abi, deployer)
-	let numberOfTokens = ethers.utils.parseUnits("130000.0", 18) //13%
-	let options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
-	let tx = await erc20contract.transfer(dep.address, numberOfTokens, options)
-	console.log("Vested Tokens trasfered.....", tx.hash)
+	//---------- The Operations ----------
+
+	//give allowance for transfering tokens
+	let erc20contract = new ethers.Contract(baseTokenAddress, ERC20_ABI, deployer)
+	let numberOfTokens = ethers.utils.parseUnits("300000.0", 18) //30% is vested in various wallets
+	let options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits(GASPrice, "gwei") }
+	let tx = await erc20contract.increaseAllowance(dep.address, numberOfTokens, options)
+	console.log("Vested Allowance Set.....", tx.hash)
+
+	//-------------- TEAM VESTING --------------
+	let wallet = "0x1111117Fe854f5CC8BE01Ff0F74605f4F3860cbD" // team
+	let amount = ethers.utils.parseUnits("100000.0", 18)
+	let duration = 365 //days
+	let cliff = 182 //days
+	let vestingContract = new ethers.Contract(dep.address, VESTING_ABI, deployer)
+	let options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits(GASPrice, "gwei") }
+	let tx = await erc20contract.addTokenGrant(wallet, amount, duration, cliff)
+	console.log("Vested Grant Created For Team.....", tx.hash)
 	//------------------------------------------
 
 	//-------------- RESERVES VESTING --------------
-	vestingTime = Math.round(new Date().getTime() / 1000) + 900 //now + 15 minutes
-	console.log("vesting time set to", vestingTime)
-	deployed = await Vesting.deploy(baseTokenAddress, vestingAddress2, vestingTime)
-	dep = await deployed.deployed()
-	console.log("Vesting Contract deployed tx:", dep.address)
-
-	if (network === "rinkeby" || network === "mainnet") {
-		await sleep(20000) // 20 seconds sleep
-		await hre.run("verify:verify", {
-			address: dep.address,
-			constructorArguments: [baseTokenAddress, vestingAddress2, vestingTime],
-		})
-	}
-
-	erc20contract = new ethers.Contract(baseTokenAddress, erc20abi, deployer)
-	numberOfTokens = ethers.utils.parseUnits("130000.0", 18) //13%
-	options = { gasLimit: 100000, gasPrice: ethers.utils.parseUnits("1.0", "gwei") }
-	tx = await erc20contract.transfer(dep.address, numberOfTokens, options)
-	console.log("Vested tokens transfered......", tx.hash)
+	wallet = "0x11111190553D6177CA22c53fCA807871FAE687Cf" // reserves
+	amount = ethers.utils.parseUnits("100000.0", 18)
+	duration = 365 //days
+	cliff = 182 //days
+	tx = await erc20contract.addTokenGrant(wallet, amount, duration, cliff)
+	console.log("Vested Grant Created For Reserves.....", tx.hash)
 	//------------------------------------------
 }
 
