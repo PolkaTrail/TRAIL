@@ -1,10 +1,6 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat")
 require("@nomiclabs/hardhat-web3")
+const fs = require("fs-extra")
 
 function sleep(ms) {
 	return new Promise((resolve) => {
@@ -13,11 +9,8 @@ function sleep(ms) {
 }
 
 async function main() {
-	// Hardhat always runs the compile task when running scripts with its command
-	// line interface.
-	//
-	// If this script is run directly using `node` you may want to call compile
-	// manually to make sure everything is compiled
+	fs.removeSync("cache")
+	fs.removeSync("artifacts")
 	await hre.run("compile")
 
 	// We get the contract to deploy
@@ -44,13 +37,11 @@ async function main() {
 
 	console.log("Contract deployed to:", dep.address)
 
-	if (network === "rinkeby" || network === "mainnet") {
-		await sleep(20000) // 20 seconds sleep
-		await hre.run("verify:verify", {
-			address: dep.address,
-			constructorArguments: [],
-		})
-	}
+	await sleep(40000) // 40 seconds sleep
+	await hre.run("verify:verify", {
+		address: dep.address,
+		constructorArguments: [],
+	})
 }
 
 // We recommend this pattern to be able to use async/await everywhere

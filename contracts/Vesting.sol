@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.3;
+pragma solidity ^0.8.4;
 /*
 Original work taken from https://github.com/JoinColony/colonyToken/blob/master/contracts/Vesting.sol
 and https://github.com/tapmydata/tap-protocol/blob/main/contracts/VestingVault.sol

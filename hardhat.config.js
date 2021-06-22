@@ -6,7 +6,7 @@ require("@nomiclabs/hardhat-etherscan")
 
 module.exports = {
 	solidity: {
-		version: "0.8.3",
+		version: "0.8.4",
 		settings: {
 			optimizer: {
 				enabled: true,
@@ -69,6 +69,6 @@ module.exports = {
 		timeout: 20000,
 	},
 	etherscan: {
-		apiKey: process.env.ETHERSCAN_KEY,
+		apiKey: process.env.BSC_SCAP_API_KEY, //ETHERSCAN_KEY
 	},
 }
