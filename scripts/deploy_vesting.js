@@ -34,6 +34,7 @@ async function main() {
 		"ETH"
 	)
 
+	//bsc mainnet: 0xC9D3fBbc35333abC7D078049984C883bAF1AC671
 	const trailTokenAddress = "0x48B3111fbB0588ADcb178F3bF0ff2D1be9817B03"
 	let deployed = await Vesting.deploy(trailTokenAddress)
 	let dep = await deployed.deployed()
